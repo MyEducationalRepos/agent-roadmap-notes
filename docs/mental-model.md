@@ -26,6 +26,14 @@ An agent's effectiveness depends on its ability to operate in a modular, measura
 * **Structured Outputs:** Agents must emit machine-readable responses (JSON, etc.) for downstream system integration.
 * **Measurement:** Success must always be quantifiable — define output quality metrics and success criteria upfront.
 
+```mermaid
+graph LR
+    A[Customer Support] --> B(Conversational flow)
+    A --> C(Tools: pull data, order history, knowledge)
+    A --> D(Actions: refund, updating)
+    A --> E(Success is measurable)
+```
+
 ---
 
 ## 2. Context Engineering
@@ -46,10 +54,22 @@ The discipline of selecting the optimal information for each inference step.
 * **Confusion:** Leaking irrelevant context into the final output.
 * **Context Clash:** Conflicting information from multiple sources within the same context window.
 
+```mermaid
+graph TD
+    A[Memory] --> B[Semantic]
+    A --> C[Episodic]
+    A --> D[Procedural]
+```
 ---
 
 ## 3. Agent Harness Anatomy
-An agent is not just a model — it is an LLM plus a supporting runtime infrastructure.
+An agent is not just a model, it is an LLM plus a supporting runtime infrastructure.
+
+LLMs can't:
+- Maintain durable state across interactions.
+- Execute code or perform actions.
+- Access real-time information or external environments.    
+- Setup environment configuration or install packages.
 
 **Agent = Model + Harness**
 
@@ -63,6 +83,30 @@ A bare model has hard limitations: no durable state, no code execution, no real-
     * **Episodic:** Log of past events and experiences.
     * **Procedural:** Encoded know-how — how to perform tasks.
 
+
+```mermaid
+graph TD
+    Input[Control / Input] --> Model
+    Context[Context Injection] --> Model
+    
+    subgraph Harness [Execution Environment]
+        Model{LLM Model: Reason and Decide}
+        
+        Model -->|Write| DB[(Persistence / Memory)]
+        DB -->|Read| Model
+        
+        Model -->|Action| Tools[APIs / Code / Environment]
+        Tools -->|Results| Model
+        
+        Model <-->|Observe / Verify| Check[Verification Layer]
+    end
+    
+    Model --> Final[Action / Final Response]
+````
+
+
+
+
 ---
 
 ## 4. Agents as Tool-Use Loops
@@ -71,6 +115,7 @@ At its core, an agent is an **LLM invoking tools in a loop**. Exploration lets t
 * **Sub-Agent Architectures:** Delegate complex subtasks to specialized child agents.
 * **Scratchpad / Note-Taking:** Use external memory to manage long-horizon state.
 * **Search Strategies:** Apply techniques such as beam search to explore multiple action paths in parallel.
+
 
 
 
