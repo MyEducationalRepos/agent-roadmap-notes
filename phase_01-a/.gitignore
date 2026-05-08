@@ -1,0 +1,4 @@
+.env
+out.md
+__pycache__/
+.venv/
