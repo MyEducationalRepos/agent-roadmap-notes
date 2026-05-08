@@ -58,3 +58,13 @@ Two rules the API enforces:
 - `tool_result` blocks belong in **one** user message, not several. Splitting them breaks the turn pairing.
 
 The dispatch step itself is sequential here (simple, deterministic logging); for I/O-heavy tools it could be parallelised with threads without changing the message contract.
+
+## Tool error handling
+
+Tool failures are returned to the model as data, never raised. The policy has three rules:
+
+1. **Per-tool catch.** Each tool function returns a string. Exceptions and bad inputs become a string starting with `Error:` (e.g. `Error: file not found – out.md`). The tool itself never crashes the loop.
+2. **`is_error: true` on the tool_result.** `dispatch(...)` wraps the string in a `tool_result` block and sets `is_error=True` whenever the content starts with `Error:` or an exception was caught. The model receives the failure inline and can decide how to proceed.
+3. **Model decides retry.** No automatic retries in code. The agent appends the `tool_result` and lets the model choose: rephrase the call, try a different tool, or stop. This keeps the control loop trivial and pushes recovery logic to the part of the system best equipped for it.
+
+Unknown tool names are handled the same way: `dispatch` returns `Error: unknown tool – <name>` with `is_error=True` instead of raising.
