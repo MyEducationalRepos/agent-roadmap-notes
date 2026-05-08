@@ -1,8 +1,29 @@
 """Tool registry and dispatcher for the Phase 1a agent."""
 
+import os
 from pathlib import Path
 
+from tavily import TavilyClient
+
 TOOLS = []
+
+_tavily = TavilyClient(api_key=os.environ["TAVILY_API_KEY"]) if os.environ.get("TAVILY_API_KEY") else None
+
+
+def web_search(query):
+	if _tavily is None:
+		return "Error: TAVILY_API_KEY not set"
+	try:
+		response = _tavily.search(query=query, max_results=5)
+		results = response.get("results", []) if isinstance(response, dict) else []
+		if not results:
+			return "No results"
+		return "\n\n".join(
+			f"{item.get('title', '')}\n{item.get('url', '')}\n{item.get('content', '')}"
+			for item in results
+		)
+	except Exception as error:
+		return f"Error: web search failed – {error}"
 
 
 def read_file(path):

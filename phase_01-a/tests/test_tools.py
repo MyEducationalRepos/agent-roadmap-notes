@@ -1,6 +1,11 @@
 from pathlib import Path
 
-from tools import read_file, write_file
+import os
+
+os.environ.setdefault("TAVILY_API_KEY", "test-key")
+
+import tools
+from tools import read_file, web_search, write_file
 
 
 def test_read_file_exists(tmp_path: Path) -> None:
@@ -38,3 +43,26 @@ def test_write_file_bad_dir(tmp_path: Path) -> None:
     result = write_file(str(file_path), "saved content")
 
     assert result == f"Error: parent directory not found – {file_path.parent}"
+
+
+def test_web_search_mock(mocker) -> None:
+    fake_response = {
+        "results": [
+            {"title": "T1", "url": "https://example.com/1", "content": "C1"},
+            {"title": "T2", "url": "https://example.com/2", "content": "C2"},
+        ]
+    }
+    mocker.patch.object(tools._tavily, "search", return_value=fake_response)
+
+    result = web_search("anything")
+
+    assert "T1" in result and "https://example.com/1" in result and "C1" in result
+    assert "T2" in result
+
+
+def test_web_search_api_error(mocker) -> None:
+    mocker.patch.object(tools._tavily, "search", side_effect=RuntimeError("boom"))
+
+    result = web_search("anything")
+
+    assert result == "Error: web search failed – boom"
