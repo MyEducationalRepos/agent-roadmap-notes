@@ -82,4 +82,34 @@ def write_file(path, content):
 
 
 def dispatch(name, args, tool_use_id):
-	raise NotImplementedError()
+	handler = _HANDLERS.get(name)
+	if handler is None:
+		return {
+			"type": "tool_result",
+			"tool_use_id": tool_use_id,
+			"content": f"Error: unknown tool – {name}",
+			"is_error": True,
+		}
+	try:
+		content = handler(**args)
+		is_error = isinstance(content, str) and content.startswith("Error:")
+		return {
+			"type": "tool_result",
+			"tool_use_id": tool_use_id,
+			"content": content,
+			"is_error": is_error,
+		}
+	except Exception as error:
+		return {
+			"type": "tool_result",
+			"tool_use_id": tool_use_id,
+			"content": f"Error: tool raised – {error}",
+			"is_error": True,
+		}
+
+
+_HANDLERS = {
+	"web_search": web_search,
+	"read_file": read_file,
+	"write_file": write_file,
+}
