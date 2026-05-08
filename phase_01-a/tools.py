@@ -5,7 +5,42 @@ from pathlib import Path
 
 from tavily import TavilyClient
 
-TOOLS = []
+TOOLS = [
+	{
+		"name": "web_search",
+		"description": "Search the web via Tavily and return up to 5 results as plain text.",
+		"input_schema": {
+			"type": "object",
+			"properties": {
+				"query": {"type": "string", "description": "Search query"},
+			},
+			"required": ["query"],
+		},
+	},
+	{
+		"name": "read_file",
+		"description": "Read a UTF-8 text file from disk and return its contents.",
+		"input_schema": {
+			"type": "object",
+			"properties": {
+				"path": {"type": "string", "description": "Filesystem path to read"},
+			},
+			"required": ["path"],
+		},
+	},
+	{
+		"name": "write_file",
+		"description": "Write UTF-8 text to a file, creating or overwriting it.",
+		"input_schema": {
+			"type": "object",
+			"properties": {
+				"path": {"type": "string", "description": "Filesystem path to write"},
+				"content": {"type": "string", "description": "Text content to write"},
+			},
+			"required": ["path", "content"],
+		},
+	},
+]
 
 _tavily = TavilyClient(api_key=os.environ["TAVILY_API_KEY"]) if os.environ.get("TAVILY_API_KEY") else None
 

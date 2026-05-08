@@ -66,3 +66,16 @@ def test_web_search_api_error(mocker) -> None:
     result = web_search("anything")
 
     assert result == "Error: web search failed – boom"
+
+
+def test_tools_schema() -> None:
+    assert isinstance(tools.TOOLS, list)
+    names = [t["name"] for t in tools.TOOLS]
+    assert names == ["web_search", "read_file", "write_file"]
+    for tool in tools.TOOLS:
+        assert set(tool.keys()) >= {"name", "description", "input_schema"}
+        schema = tool["input_schema"]
+        assert schema["type"] == "object"
+        assert "properties" in schema and "required" in schema
+        for required_field in schema["required"]:
+            assert required_field in schema["properties"]
