@@ -26,4 +26,12 @@ DEFAULT_TASK = (
 
 
 if __name__ == "__main__":
-	pass
+	task = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_TASK
+	messages = [{"role": "user", "content": task}]
+	response = client.messages.create(
+		model=MODEL,
+		max_tokens=1024,
+		tools=TOOLS,
+		messages=messages,
+	)
+	print(f"stop_reason: {response.stop_reason}")
