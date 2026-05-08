@@ -28,10 +28,22 @@ DEFAULT_TASK = (
 if __name__ == "__main__":
 	task = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_TASK
 	messages = [{"role": "user", "content": task}]
-	response = client.messages.create(
-		model=MODEL,
-		max_tokens=1024,
-		tools=TOOLS,
-		messages=messages,
-	)
-	print(f"stop_reason: {response.stop_reason}")
+	for turn in range(1, MAX_TURNS + 1):
+		response = client.messages.create(
+			model=MODEL,
+			max_tokens=1024,
+			tools=TOOLS,
+			messages=messages,
+		)
+		print(f"stop_reason: {response.stop_reason}")
+		if response.stop_reason == "end_turn":
+			print("=== DONE ===")
+			break
+		elif response.stop_reason == "max_tokens":
+			print("=== HALT: max_tokens ===")
+			break
+		else:
+			print(f"=== HALT: unhandled stop_reason {response.stop_reason} ===")
+			break
+	else:
+		print(f"=== HALT: MAX_TURNS={MAX_TURNS} reached ===")
