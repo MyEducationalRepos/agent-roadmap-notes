@@ -42,6 +42,19 @@ if __name__ == "__main__":
 		elif response.stop_reason == "max_tokens":
 			print("=== HALT: max_tokens ===")
 			break
+		elif response.stop_reason == "tool_use":
+			# Parallel tool calls: dispatch every tool_use block in this turn
+			# and return all results in a single user message — required by
+			# the Anthropic tool-use contract.
+			messages.append({"role": "assistant", "content": response.content})
+			tool_results = [
+				dispatch(block.name, block.input, block.id)
+				for block in response.content
+				if block.type == "tool_use"
+			]
+			for result in tool_results:
+				print(f"tool_use_id={result['tool_use_id']} is_error={result['is_error']}")
+			messages.append({"role": "user", "content": tool_results})
 		else:
 			print(f"=== HALT: unhandled stop_reason {response.stop_reason} ===")
 			break
