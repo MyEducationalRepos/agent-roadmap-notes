@@ -48,6 +48,16 @@ The discipline of selecting the optimal information for each inference step.
     * **Compress:** Summarize to reduce token footprint.
     * **Isolate:** Partition contexts to prevent interference or conflicts.
 
+### Types of Memory (in agent systems)
+Memory is *where context comes from* and *how it persists* across steps/sessions. Common buckets:
+
+* **Working / Scratchpad (short-lived):** Step-local notes, intermediate calculations, plans. High volatility; easiest to poison; best kept minimal.
+* **Semantic (long-lived):** Facts, concepts, entities, and embeddings (e.g., “what is X”, “docs for Y”). Typically stored in a vector DB / knowledge base.
+* **Episodic (long-lived):** Time-ordered interaction history and past runs (e.g., “what happened last time”, user preferences learned from sessions).
+* **Procedural (long-lived):** “How-to” knowledge: playbooks, runbooks, tool-use recipes, workflows, and guardrails.
+
+Design implication: treat each memory type as a separate source with its own retrieval policy and trust level (then **Select/Compress/Isolate** before injection).
+
 ### Common Failure Modes
 * **Context Poisoning:** Corrupt or incorrect data that triggers hallucinations.
 * **Distraction:** Information overload that degrades model focus.
@@ -115,8 +125,3 @@ At its core, an agent is an **LLM invoking tools in a loop**. Exploration lets t
 * **Sub-Agent Architectures:** Delegate complex subtasks to specialized child agents.
 * **Scratchpad / Note-Taking:** Use external memory to manage long-horizon state.
 * **Search Strategies:** Apply techniques such as beam search to explore multiple action paths in parallel.
-
-
-
-
-
