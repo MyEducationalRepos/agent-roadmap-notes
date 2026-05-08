@@ -1,1 +1,2 @@
 [2026-05-08 14:32] Architecture sprint notes: [started! ]
+[2026-05-08] CLAUDE.md written — 19 tasks indexed across 5 phases (Bootstrap, Tool Layer, Agent Loop, Validation, Docs). All statuses: Pending. Source: architecture.md + tasks.md. ARM audit: all deps pure-Python, no native binary risk on M-series.
