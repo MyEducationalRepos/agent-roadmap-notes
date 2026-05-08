@@ -1,4 +1,52 @@
-# Phase 1a — Raw SDK agent
+# agent-from-scratch
+
+A minimal tool-using agent built directly on `anthropic.messages.create` — no frameworks, no Pydantic, under 100 lines of agent code. Three tools (`web_search` via Tavily, `read_file`, `write_file`), explicit `stop_reason` handling, parallel tool dispatch, and errors-as-data.
+
+## Prerequisites
+
+- Python 3.12
+- [`uv`](https://docs.astral.sh/uv/) for env and dependency management
+- An Anthropic API key (`ANTHROPIC_API_KEY`)
+- A Tavily API key (`TAVILY_API_KEY`)
+
+## Installation
+
+```bash
+git clone <repo-url> && cd phase_01-a
+uv venv
+uv sync
+cp .env.example .env   # then fill in your keys
+```
+
+`.env` must contain:
+
+```env
+ANTHROPIC_API_KEY=sk-ant-...
+TAVILY_API_KEY=tvly-...
+MODEL=claude-haiku-4-5
+```
+
+## Usage
+
+Run the default task (summarise the last 5 Anthropic engineering posts to `out.md`):
+
+```bash
+uv run python agent.py
+```
+
+Override the task with a CLI arg:
+
+```bash
+uv run python agent.py "Find the current Python version and write it to version.txt"
+```
+
+Run the test suite:
+
+```bash
+uv run pytest
+```
+
+## Phase 1a checklist
 
 1. Create a new public repo `agent-from-scratch`.
 2. Write a tool-using agent in **under 100 lines** using `anthropic.messages.create`.
