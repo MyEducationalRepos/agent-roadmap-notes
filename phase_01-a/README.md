@@ -36,3 +36,25 @@ else:
     print(f"=== HALT: unhandled stop_reason {response.stop_reason} ===")
     break
 ```
+
+## Parallel tool calls
+
+When `stop_reason == "tool_use"`, the assistant message can carry **several** `tool_use` blocks in a single turn — for example, two `web_search` calls plus one `read_file`. The agent treats this as the contract:
+
+1. Append the **whole** assistant message (`response.content`) to the conversation. All `tool_use` blocks must travel together.
+2. Run every tool via `dispatch(...)` and collect one `tool_result` per `tool_use_id`.
+3. Append a **single** user message whose `content` is the list of all `tool_result` blocks, in the same order.
+
+In code this is one list comprehension:
+
+```python
+results = [dispatch(b.name, b.input, b.id) for b in tool_uses]
+messages.append({"role": "user", "content": results})
+```
+
+Two rules the API enforces:
+
+- Every `tool_use_id` from the assistant turn must have a matching `tool_result` in the next user turn — partial replies raise a 400.
+- `tool_result` blocks belong in **one** user message, not several. Splitting them breaks the turn pairing.
+
+The dispatch step itself is sequential here (simple, deterministic logging); for I/O-heavy tools it could be parallelised with threads without changing the message contract.
