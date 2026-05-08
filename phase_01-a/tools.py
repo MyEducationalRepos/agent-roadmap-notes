@@ -42,14 +42,25 @@ TOOLS = [
 	},
 ]
 
-_tavily = TavilyClient(api_key=os.environ["TAVILY_API_KEY"]) if os.environ.get("TAVILY_API_KEY") else None
+_tavily = None
+
+
+def _get_tavily():
+	global _tavily
+	if _tavily is None:
+		api_key = os.environ.get("TAVILY_API_KEY")
+		if not api_key:
+			return None
+		_tavily = TavilyClient(api_key=api_key)
+	return _tavily
 
 
 def web_search(query):
-	if _tavily is None:
+	client = _get_tavily()
+	if client is None:
 		return "Error: TAVILY_API_KEY not set"
 	try:
-		response = _tavily.search(query=query, max_results=5)
+		response = client.search(query=query, max_results=5)
 		results = response.get("results", []) if isinstance(response, dict) else []
 		if not results:
 			return "No results"

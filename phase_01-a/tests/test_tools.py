@@ -52,7 +52,9 @@ def test_web_search_mock(mocker) -> None:
             {"title": "T2", "url": "https://example.com/2", "content": "C2"},
         ]
     }
-    mocker.patch.object(tools._tavily, "search", return_value=fake_response)
+    fake_client = mocker.MagicMock()
+    fake_client.search.return_value = fake_response
+    mocker.patch.object(tools, "_get_tavily", return_value=fake_client)
 
     result = web_search("anything")
 
@@ -61,7 +63,9 @@ def test_web_search_mock(mocker) -> None:
 
 
 def test_web_search_api_error(mocker) -> None:
-    mocker.patch.object(tools._tavily, "search", side_effect=RuntimeError("boom"))
+    fake_client = mocker.MagicMock()
+    fake_client.search.side_effect = RuntimeError("boom")
+    mocker.patch.object(tools, "_get_tavily", return_value=fake_client)
 
     result = web_search("anything")
 

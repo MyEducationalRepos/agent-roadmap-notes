@@ -29,6 +29,7 @@ if __name__ == "__main__":
 	task = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_TASK
 	messages = [{"role": "user", "content": task}]
 	for turn in range(1, MAX_TURNS + 1):
+		print(f"--- Step {turn} ---")
 		response = client.messages.create(
 			model=MODEL,
 			max_tokens=1024,
@@ -47,13 +48,15 @@ if __name__ == "__main__":
 			# and return all results in a single user message — required by
 			# the Anthropic tool-use contract.
 			messages.append({"role": "assistant", "content": response.content})
-			tool_results = [
-				dispatch(block.name, block.input, block.id)
-				for block in response.content
-				if block.type == "tool_use"
-			]
+			tool_uses = [b for b in response.content if b.type == "tool_use"]
+			for block in tool_uses:
+				print(f"tool: {block.name} input: {str(block.input)[:MAX_RESULT_CHARS]}")
+			tool_results = [dispatch(b.name, b.input, b.id) for b in tool_uses]
 			for result in tool_results:
-				print(f"tool_use_id={result['tool_use_id']} is_error={result['is_error']}")
+				print(
+					f"tool_use_id={result['tool_use_id']} is_error={result['is_error']} "
+					f"result: {str(result['content'])[:MAX_RESULT_CHARS]}"
+				)
 			messages.append({"role": "user", "content": tool_results})
 		else:
 			print(f"=== HALT: unhandled stop_reason {response.stop_reason} ===")
