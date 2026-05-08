@@ -1,4 +1,5 @@
 .env
 out.md
+trace.txt
 __pycache__/
 .venv/
